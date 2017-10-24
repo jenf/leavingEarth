@@ -1,0 +1,18 @@
+{
+   "steps" : [
+      {
+         "step" : "add",
+         "mass" : 10
+      },
+      {
+         "rockets" : [
+            [
+               3,
+               "Juno"
+            ]
+         ],
+         "step" : "burn",
+         "difficulty" : 3
+      }
+   ]
+}

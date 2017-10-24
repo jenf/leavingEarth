@@ -1,0 +1,41 @@
+{
+   "readme": "Recurring floating points are rounded in favour of the player",
+   "rockets": {
+   "juno" : {
+      "weight" : 1,
+      "difficulty" : [3, 1, 0.34]
+   },
+   "atlas" : {
+        "weight": 4,
+        "difficulty": [23, 9.50, 5, 2.75, 1.4, 0.5]
+   },
+   "soyuz" : {
+        "weight": 9,
+        "difficulty": [71,31,17.67, 11, 7, 4.34, 2.43, 1]
+   },
+   "saturn" : {
+        "weight": 20,
+        "difficulty": [180,80,46.67, 30, 20, 13.34, 8.58, 5.67, 2.23] 
+   },
+   "proton" : {
+        "expansion": "outer_planets",
+        "weight": 6,
+        "difficulty": [64,29, 17.34,11.5,8,5.67, 4, 2.75, 1.78, 1, 0.37]
+    },
+    "ion" : {
+        "difficulty_axis": "time",
+        "weight": 1,
+        "difficulty": [
+        [4   , 9   ,14    ,19   , 24    , 29   , 34    , 39],
+        [1.5 , 4   , 6.5  , 9   , 11.5  , 14   , 16.5  , 19],
+        [0.67, 2.34, 4    , 5.67,  7.34 ,  9   , 10.67 , 12.34],
+        [0.25, 1.5 , 2.75 , 4   ,  5.25 ,  6.5 ,  7.75 ,  9],
+        [0   , 1   , 2    , 3   ,  4    ,  5   ,  6    ,  7],
+        [0   , 0.67, 1.5  , 2.34,  3.17 ,  4   ,  4.84 ,  5.67],
+        [0   , 0.43, 1.15 , 1.86,  2.58 ,  3.29,  4    ,  4.72] ,
+        [0   , 0.25, 0.875, 1.5 ,  2.125,  2.75,  3.375,  4]
+        ],
+        "notes": "to double check"
+    }
+    }
+}
