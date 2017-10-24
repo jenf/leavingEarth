@@ -1,0 +1,5 @@
+cmd: npm run build;
+targets:
+  test:
+    cmd: "npm run build; npm run test"
+    sh: true

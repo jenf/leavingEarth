@@ -5,6 +5,12 @@ var engines = JSON.parse(fs.readFileSync("engines.json"));
 var assert = require('assert');
 
 var plan = JSON.parse(fs.readFileSync("plan.json"));
+/* Next steps
+
+1. Move the calculator to an object to hide the rockets.
+2. Implement burn for calculatePlan
+3. Change calculateThrust to take object/dict
+*/
 
 describe("Calculate", () => {
   describe("#calculateThrust", () => {
@@ -27,11 +33,25 @@ describe("Calculate", () => {
   });
   describe("#calculatePlan", () => {
     it("Should add and remove mass correctly", () => {
-        calc.calculatePlan(plan);
-        console.log(plan);
+        var data={ "steps" : [ { "step" : "add", "mass" : 10 }, { "step" :
+        "remove", "mass": 5 } ] }
+        calc.calculatePlan(data, engines);
+        assert.equal(data.steps[0].currentMass, 10);
+        assert.deepEqual(data.steps[0].currentRockets, []);
+        assert.equal(data.steps[1].currentMass, 5);
+        assert.deepEqual(data.steps[1].currentRockets, []);
     });
+    it("Should add and remove rockets correctly and calculate mass", () => {
+      var data={ "steps" : [
+        { "step" : "add", "mass" : 0, "rockets":{"soyuz":3,"saturn":1}},
+        { "step" : "remove", "mass": 0,  "rockets": {"soyuz": 2}}
+      ] };
+      calc.calculatePlan(data, engines);
+      assert.equal(data.steps[0].currentMass, 3*9+20);
+      assert.deepEqual(data.steps[0].currentRockets, {"soyuz":3,"saturn":1});
+      assert.equal(data.steps[1].currentMass, 9+20);
+      assert.deepEqual(data.steps[1].currentRockets, {"soyuz":1,"saturn":1});
+    });
+
   });
 });
-
-
-
