@@ -5,11 +5,6 @@ var engines = JSON.parse(fs.readFileSync("engines.json"));
 var assert = require('assert');
 
 var plan = JSON.parse(fs.readFileSync("plan.json"));
-/* Next steps
-
-2. Implement burn for calculatePlan
-3. Implement ion engines
-*/
 
 describe("Calculate", () => {
   describe("#calculateThrust", () => {
