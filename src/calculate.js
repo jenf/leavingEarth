@@ -1,7 +1,3 @@
-
-
-
-
 class LeavingEarthCalculator {
   constructor(engines) {
     this.engines=engines;
@@ -10,11 +6,15 @@ class LeavingEarthCalculator {
   calculatePlan(plan) {
       var currentMass=0;
       var currentRockets={}
+      var success = true;
       plan.steps.forEach(x => {
 
-          if (x.step=='add') {
-              currentMass+=x.mass;
-              if (x.rockets!=null) {
+          switch (x.step) {
+          case 'add':
+              if (x.mass !== undefined) {
+                currentMass+=x.mass;
+              }
+              if (x.rockets!==undefined) {
                 for (const key of Object.keys(x.rockets)) {
                   if (key in currentRockets) {
                     currentRockets[key]+=x.rockets[key];
@@ -25,9 +25,13 @@ class LeavingEarthCalculator {
                   currentMass+=this.engines.rockets[key].weight*x.rockets[key];
                 }
               }
-          } else if (x.step=='remove') {
-              currentMass-=x.mass;
-              if (x.rockets!=null) {
+              break;
+          case 'remove':
+          case 'burn':
+              if (x.mass !== undefined) {
+                currentMass-=x.mass;
+              }
+              if (x.rockets!== undefined) {
                 for (const key of Object.keys(x.rockets)) {
                   if (key in currentRockets) {
                     currentRockets[key]-=x.rockets[key];
@@ -35,20 +39,40 @@ class LeavingEarthCalculator {
                   else {
                     currentRockets[key]=-x.rockets[key];
                   }
+                  if (currentRockets[key] < 0) {
+                    success = false;
+                    x.error = "Negative rockets remain";
+                  }
                   currentMass-=this.engines.rockets[key].weight*x.rockets[key];
                 }
               }
+              if (x.step==='burn') {
+                var [thrust, mass] = this.calculateThrustAndMass(x.rockets, x.difficulty);
+                x.totalThrust = thrust;
+                x.spareThrust = thrust-currentMass;
+                if (x.spareThrust < 0) {
+                  success = false;
+                  x.error = "Thrust needs to be greater than 0";
+                }
+              }
+              break;
+          default:
+            console.log("Unknown plan step "+x.step);
           }
 
           x.currentMass=currentMass;
+          if (x.currentMass < 0) {
+            success = false;
+            x.error = "Mass is less than 0";
+          }
           x.currentRockets=Object.assign({}, currentRockets);
       });
-
+      return success;
   }
 
   getEngineThrustMass(selEngine, difficulty, number) {
       var engine = this.engines.rockets[selEngine];
-      var thrust = engine.difficulty[difficulty+1]*number;
+      var thrust = engine.difficulty[difficulty-1]*number;
       var mass = engine.weight*number;
       return [thrust, mass];
   }
