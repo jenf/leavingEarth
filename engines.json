@@ -3,24 +3,29 @@
    "rockets": {
    "juno" : {
       "weight" : 1,
-      "difficulty" : [3, 1, 0.34]
+      "difficulty" : [3, 1, 0.34],
+      "singleUse": true
    },
    "atlas" : {
         "weight": 4,
-        "difficulty": [23, 9.50, 5, 2.75, 1.4, 0.5]
+        "difficulty": [23, 9.50, 5, 2.75, 1.4, 0.5],
+        "singleUse": true
    },
    "soyuz" : {
         "weight": 9,
-        "difficulty": [71,31,17.67, 11, 7, 4.34, 2.43, 1]
+        "difficulty": [71,31,17.67, 11, 7, 4.34, 2.43, 1],
+        "singleUse": true
    },
    "saturn" : {
         "weight": 20,
-        "difficulty": [180,80,46.67, 30, 20, 13.34, 8.58, 5.67, 2.23] 
+        "difficulty": [180,80,46.67, 30, 20, 13.34, 8.58, 5.67, 2.23],
+        "singleUse": true
    },
    "proton" : {
         "expansion": "outer_planets",
         "weight": 6,
-        "difficulty": [64,29, 17.34,11.5,8,5.67, 4, 2.75, 1.78, 1, 0.37]
+        "difficulty": [64,29, 17.34,11.5,8,5.67, 4, 2.75, 1.78, 1, 0.37],
+        "singleUse": true
     },
     "ion" : {
         "difficulty_axis": "time",
@@ -35,7 +40,7 @@
         [0   , 0.43, 1.15 , 1.86,  2.58 ,  3.29,  4    ,  4.72] ,
         [0   , 0.25, 0.875, 1.5 ,  2.125,  2.75,  3.375,  4]
         ],
-        "notes": "to double check"
+        "singleUse": false
     }
     }
 }
