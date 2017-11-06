@@ -7,6 +7,7 @@ class LeavingEarthCalculator {
       var currentMass=0;
       var currentRockets={}
       var success = true;
+      var index=1;
       plan.steps.forEach(x => {
 
           switch (x.step) {
@@ -48,14 +49,14 @@ class LeavingEarthCalculator {
                   }
                   if (currentRockets[key] < 0) {
                     success = false;
-                    x.error = "Negative rockets remain";
+                    x.error = "More "+key+" rockets used than onboard";
                   }
                   currentMass-=this.engines.rockets[key].weight*x.rockets[key];
                 }
               }
               if (x.step==='burn') {
                 var time = x.time;
-                if (time == undefined) {
+                if (time === undefined) {
                   time=1;
                 }
                 var [thrust, mass] = this.calculateThrustAndMass(x.rockets, x.difficulty, time);
@@ -77,6 +78,11 @@ class LeavingEarthCalculator {
             x.error = "Mass is less than 0";
           }
           x.currentRockets=Object.assign({}, currentRockets);
+          x.index=index;
+          if (success=== false && plan.error===undefined) {
+            plan.error=index+": "+x.error;
+          }
+          index++
       });
       return success;
   }
@@ -98,14 +104,13 @@ class LeavingEarthCalculator {
   }
 
   calculateThrustAndMass(item, difficulty, time=1) {
+      var sum=0;
+      var mass=0;
       var selEngine = item;
-      var multiplier = 1;
       if (Array.isArray(item)) {
-          if (typeof(item[0])=="number") {
+          if (typeof(item[0])==="number") {
               return this.getEngineThrustMass(item[1], difficulty, item[0], time)
           } else {
-              var sum=0;
-              var mass=0;
               item.forEach(i => {
                   var v=this.calculateThrustAndMass(i, difficulty, time);
                   sum+=v[0];
@@ -116,8 +121,6 @@ class LeavingEarthCalculator {
       } else if (typeof item === "string") {
         return this.getEngineThrustMass(selEngine, difficulty, 1, time)
       } else {
-          var sum=0;
-          var mass=0;
           for (const key of Object.keys(item)) {
              var v=this.getEngineThrustMass(key, difficulty, item[key], time);
              sum+=v[0];

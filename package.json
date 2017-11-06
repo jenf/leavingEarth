@@ -2,14 +2,22 @@
   "name": "my-project",
   "version": "1.0.0",
   "scripts": {
-    "test": "nyc ./node_modules/mocha/bin/mocha --require babel-register"
+    "test": "nyc ./node_modules/mocha/bin/mocha --require babel-register",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "reacttest": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "mocha": "^4.0.1",
-    "nyc": "^11.3.0"
+    "nyc": "^11.3.0",
+    "react-scripts": "^1.0.17"
   },
   "dependencies": {
-    "babel-register": "^6.26.0"
+    "babel-register": "^6.26.0",
+    "pluralize": "^7.0.0",
+    "react": "^16.0.0",
+    "react-dom": "^16.0.0"
   }
 }
