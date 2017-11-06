@@ -11,35 +11,61 @@ var data={ "steps" : [
 ] };
 
 class Step extends Component {
+  constructor(props) {
+    super(props);
+    this.state=props.step;
+
+    this.handleDifficultyChange = this.handleDifficultyChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
   capitalize(str) {
     return str[0].toUpperCase() + str.slice(1)
   }
   renderRocketList(rockets) {
     return Object.keys(rockets).map((rocket, index) => { return (index!==0?", ":"")+pluralize(this.capitalize(rocket), rockets[rocket], true)});
   }
+
+  handleSubmit(event) {
+
+  }
+
+  handleDifficultyChange(event) {
+    console.log("Changed to "+event.target.value);
+    this.props.step.difficulty=event.target.value;
+
+    this.setState({difficulty: this.props.step.difficulty});
+  }
+
   render() {
-    var props = this.props;
+    const step = this.state;
     return (
       <tr>
-      <td>{props.step.index+". "+this.capitalize(props.step.step)}</td>
-      <td>{(props.step.step==="burn" && props.step.difficulty) || "N/A"}</td>
-      <td>{(props.step.time!==undefined && props.step.time) || "N/A"}</td>
-      <td>{props.step.currentMass}</td>
-      <td>{this.renderRocketList(props.step.rockets)}</td>
-      <td>{props.step.step==="burn" && (<span>{props.step.totalThrust.toFixed(2)}({props.step.spareThrust.toFixed(2)})</span>)}</td>
-      <td>{(props.step.error===undefined
-         && this.renderRocketList(props.step.currentRockets))
-         || (<span className="error">{props.step.error}</span>)}</td>
+
+      <td>{step.index+". "+this.capitalize(step.step)}</td>
+      <td>{(step.step==="burn" && <input type="number" value={step.difficulty} onChange={this.handleDifficultyChange} />) || "N/A"}</td>
+      <td>{(step.time!==undefined && step.time) || "N/A"}</td>
+      <td>{step.currentMass}</td>
+      <td>{this.renderRocketList(step.rockets)}</td>
+      <td>{step.step==="burn" && (<span>{step.totalThrust.toFixed(2)}({step.spareThrust.toFixed(2)})</span>)}</td>
+      <td>{(step.error===undefined
+         && this.renderRocketList(step.currentRockets))
+         || (<span className="error">{step.error}</span>)}</td>
       </tr>
     );
   }
 }
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.lec = new LeavingEarth.LeavingEarthCalculator(engines);
+  }
   render() {
-    var lec = new LeavingEarth.LeavingEarthCalculator(engines);
-    lec.calculatePlan(data);
+    this.lec.calculatePlan(data);
+    this.data=data;
     return (
+      <form onSubmit={this.handleSubmit}>
       <table className="App">
       <thead>
       <tr>
@@ -58,11 +84,12 @@ class App extends Component {
       <tfoot>
        <tr>
        {(data.error === undefined
-         && <td colspan="6" className="success">Success</td>)
-         || <td colspan="6" className="error">{data.error}</td>}
+         && <td colSpan="6" className="success">Success</td>)
+         || <td colSpan="6" className="error">{data.error}</td>}
         </tr>
       </tfoot>
       </table>
+      </form>
     );
   }
 }
