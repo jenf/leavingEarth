@@ -1,4 +1,4 @@
-var LeavingEarthCalculator = require("../lib/calculate.js").LeavingEarthCalculator;
+var LeavingEarthCalculator = require("../src/lib/leavingEarth.js").LeavingEarthCalculator;
 
 var fs = require("fs");
 var engines = JSON.parse(fs.readFileSync("engines.json"));
