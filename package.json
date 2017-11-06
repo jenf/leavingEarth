@@ -2,11 +2,12 @@
   "name": "my-project",
   "version": "1.0.0",
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha --require babel-register"
+    "test": "nyc ./node_modules/mocha/bin/mocha --require babel-register"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
-    "mocha": "^4.0.1"
+    "mocha": "^4.0.1",
+    "nyc": "^11.3.0"
   },
   "dependencies": {
     "babel-register": "^6.26.0"

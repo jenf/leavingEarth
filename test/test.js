@@ -69,6 +69,24 @@ describe("Calculate", () => {
       assert.deepEqual(data.steps[1].currentRockets, {"soyuz":1,"saturn":1});
     });
 
+    it("Should add and remove multiple times correctly", () => {
+      var data={ "steps" : [
+        { "step" : "add", "mass" : 1, "rockets":{"soyuz":3,"saturn":1}},
+        { "step" : "add", "mass" : 1, "rockets":{"soyuz":3,"saturn":1}},
+        { "step" : "remove", "mass": 1,  "rockets": {"soyuz": 2}},
+        { "step" : "remove", "mass": 1,  "rockets": {"soyuz": 2}}
+      ] };
+      var lec = new LeavingEarthCalculator(engines);
+      assert.equal(lec.calculatePlan(data), true);
+      assert.equal(data.steps[0].currentMass, 3*9+20+1);
+      assert.deepEqual(data.steps[0].currentRockets, {"soyuz":3,"saturn":1});
+      assert.equal(data.steps[1].currentMass, 6*9+2*20+2);
+      assert.deepEqual(data.steps[1].currentRockets, {"soyuz":6,"saturn":2});
+      assert.equal(data.steps[2].currentMass, 4*9+2*20+1);
+      assert.deepEqual(data.steps[2].currentRockets, {"soyuz":4,"saturn":2});
+      assert.equal(data.steps[3].currentMass, 2*9+2*20);
+      assert.deepEqual(data.steps[3].currentRockets, {"soyuz":2,"saturn":2});
+    });
     it("Should add and calculate burns correctly and calculate mass", () => {
       var data={ "steps" : [
         { "step" : "add", "mass" : 0, "rockets":{"soyuz":3,"saturn":1}},
@@ -105,15 +123,19 @@ describe("Calculate", () => {
     it("Removing non-existant rockets should return failure", () => {
       var data={ "steps" : [
         { "step" : "add", "mass" : 0, "rockets":{"soyuz":3,"saturn":1}},
-        { "step" : "remove", "mass": 0,  "rockets": {"soyuz": 4}}
+        { "step" : "remove", "mass": 1,  "rockets": {"soyuz": 4, "juno": 1}},
+        { "step" : "remove", "mass": 1,  "rockets": {"saturn": 1}}
       ] };
       var lec = new LeavingEarthCalculator(engines);
       assert.equal(lec.calculatePlan(data), false);
       assert.equal(data.steps[0].currentMass, 3*9+20);
       assert.deepEqual(data.steps[0].currentRockets, {"soyuz":3,"saturn":1});
-      assert.equal(data.steps[1].currentMass, (-1*9)+20);
-      assert.deepEqual(data.steps[1].currentRockets, {"soyuz":-1,"saturn":1});
+      assert.equal(data.steps[1].currentMass, (-1*9)+20+(-1)+(-1));
+      assert.deepEqual(data.steps[1].currentRockets, {"soyuz":-1,"saturn":1, "juno":-1});
       assert.notEqual(data.steps[1].error, undefined);
+      assert.equal(data.steps[2].currentMass, (-1*9)+(-1)+(-2));
+      assert.deepEqual(data.steps[2].currentRockets, {"soyuz":-1, "saturn":0, "juno":-1});
+      assert.notEqual(data.steps[2].error, undefined);
     });
 
     it("An ion thruster should lift mass with time and not remove itself", () => {
