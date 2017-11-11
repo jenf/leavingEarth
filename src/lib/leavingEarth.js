@@ -3,13 +3,18 @@ class LeavingEarthCalculator {
     this.engines=engines;
   }
 
+  getEngines() {
+    return Object.keys(this.engines.rockets);
+  }
+
   calculatePlan(plan) {
       var currentMass=0;
       var currentRockets={}
       var success = true;
       var index=1;
+      plan.error=undefined;
       plan.steps.forEach(x => {
-
+          x.error=undefined;
           switch (x.step) {
           case 'add':
               if (x.mass !== undefined) {

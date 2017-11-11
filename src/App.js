@@ -10,43 +10,94 @@ var data={ "steps" : [
   { "step" : "burn", "rockets": {"soyuz":4}, "difficulty":3, "time":1}
 ] };
 
+class Rocket extends Component {
+    constructor(props) {
+      super(props);
+      this.handleNoRocketChange = this.handleNoRocketChange.bind(this);
+      this.handleRocketTypeChange = this.handleRocketTypeChange.bind(this);
+    }
+
+    handleNoRocketChange(event) {
+      console.log(event);
+      //this.props.step.step=event.target.value;
+      //this.props.onPlanChange(this.props.step);
+    }
+
+    handleRocketTypeChange(event) {
+      console.log(event);
+    }
+
+    render() {
+      const rocket = this.props.rocket;
+      return <span>{(this.props.index!==0?", ":"")}<input type="number" value={this.props.noRockets} onChange={this.handleNoRocketChange}/>
+      <select value={rocket} onChange={this.handleRocketTypeChange}>
+         {this.props.lec.getEngines().map((rocket, index) => {
+          return <option value={rocket} key={index}>{rocket}</option>
+        })
+       }
+      </select></span>
+    }
+}
+
 class Step extends Component {
   constructor(props) {
     super(props);
-    this.state=props.step;
 
     this.handleDifficultyChange = this.handleDifficultyChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleStepTypeChange = this.handleStepTypeChange.bind(this);
+    this.handleTimeChange = this.handleTimeChange.bind(this);
   }
 
   capitalize(str) {
     return str[0].toUpperCase() + str.slice(1)
   }
-  renderRocketList(rockets) {
-    return Object.keys(rockets).map((rocket, index) => { return (index!==0?", ":"")+pluralize(this.capitalize(rocket), rockets[rocket], true)});
-  }
 
-  handleSubmit(event) {
-
-  }
 
   handleDifficultyChange(event) {
-    console.log("Changed to "+event.target.value);
     this.props.step.difficulty=event.target.value;
 
-    this.setState({difficulty: this.props.step.difficulty});
+    this.props.onPlanChange(this.props.step);
+  }
+
+
+  handleTimeChange(event) {
+    this.props.step.time=event.target.value;
+
+    this.props.onPlanChange(this.props.step);
+  }
+
+  handleStepTypeChange(event) {
+    this.props.step.step=event.target.value;
+    this.props.onPlanChange(this.props.step);
+  }
+
+
+
+  renderRocketList(rockets, editable=false) {
+    return Object.keys(rockets).map((rocket, index) => {
+      return (index!==0?", ":"")+pluralize(this.capitalize(rocket), rockets[rocket], true)
+    });
   }
 
   render() {
-    const step = this.state;
+    const step = this.props.step;
     return (
       <tr>
 
-      <td>{step.index+". "+this.capitalize(step.step)}</td>
+      <td>{step.index}.
+      <select value={step.step} onChange={this.handleStepTypeChange} >
+       <option value="add">Add</option>
+       <option value="burn">Burn</option>
+       <option value="remove">Remove</option>
+      </select>
+      </td>
       <td>{(step.step==="burn" && <input type="number" value={step.difficulty} onChange={this.handleDifficultyChange} />) || "N/A"}</td>
-      <td>{(step.time!==undefined && step.time) || "N/A"}</td>
+      <td>{(step.time!==undefined && <input type="number" value={step.time} onChange={this.handleTimeChange} /> ) || "N/A"}</td>
       <td>{step.currentMass}</td>
-      <td>{this.renderRocketList(step.rockets)}</td>
+      <td>{Object.keys(step.rockets).map((rocket, index) => {
+        return <Rocket key={index} index={index} rocket={rocket} noRockets={step.rockets[rocket]} lec={this.props.lec} />
+      })}
+      </td>
       <td>{step.step==="burn" && (<span>{step.totalThrust.toFixed(2)}({step.spareThrust.toFixed(2)})</span>)}</td>
       <td>{(step.error===undefined
          && this.renderRocketList(step.currentRockets))
@@ -60,10 +111,22 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.lec = new LeavingEarth.LeavingEarthCalculator(engines);
-  }
-  render() {
     this.lec.calculatePlan(data);
-    this.data=data;
+    this.state = {plan: data};
+    this.handlePlanChange=this.handlePlanChange.bind(this);
+  }
+
+  handlePlanChange(plan) {
+    data = JSON.parse(JSON.stringify(this.state.plan));
+
+    data.steps[plan.index-1]=plan;
+    this.lec.calculatePlan(data);
+    this.setState({plan: data});
+  }
+
+  render() {
+    var data = this.state.plan;
+
     return (
       <form onSubmit={this.handleSubmit}>
       <table className="App">
@@ -79,7 +142,7 @@ class App extends Component {
       </tr>
       </thead>
       <tbody>
-      {data.steps.map((step,index) => { return <Step key={index} step={step} />}) }
+      {data.steps.map((step,index) => { return <Step onPlanChange={this.handlePlanChange} key={index} step={step} lec={this.lec} />}) }
       </tbody>
       <tfoot>
        <tr>

@@ -1,12 +1,15 @@
 var LeavingEarthCalculator = require("../src/lib/leavingEarth.js").LeavingEarthCalculator;
 
 var fs = require("fs");
-var engines = JSON.parse(fs.readFileSync("engines.json"));
+var engines = JSON.parse(fs.readFileSync("src/engines.json"));
 var assert = require('assert');
 
-var plan = JSON.parse(fs.readFileSync("plan.json"));
-
 describe("Calculate", () => {
+  describe("#getEngines", () => {
+    var lec = new LeavingEarthCalculator(engines);
+    assert.deepEqual(lec.getEngines().sort(), ["juno","atlas","soyuz","saturn","proton","ion"].sort());
+  });
+
   describe("#calculateThrust", () => {
     it("Should calculate difficulty 5, a soyuz correctly with thrust of 7 and mass of 9", () => {
         var lec = new LeavingEarthCalculator(engines);
