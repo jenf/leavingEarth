@@ -13,3 +13,24 @@ body {
   color: green;
   font-weight: bold;
 }
+
+input[type="number"] {
+  width: 30px;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+tr {
+  padding: 5px;
+}
+
+tr:nth-child(even) {
+  background-color: #ccc;
+
+}
+
+td {
+  border: 1px solid black;
+}

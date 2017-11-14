@@ -18,24 +18,24 @@ class Rocket extends Component {
     }
 
     handleNoRocketChange(event) {
-      console.log(event);
-      //this.props.step.step=event.target.value;
-      //this.props.onPlanChange(this.props.step);
+      this.props.onChange(this.props.rocket, this.props.rocket, event.target.value);
     }
 
     handleRocketTypeChange(event) {
-      console.log(event);
+      console.log(event.target.value);
+      this.props.onChange(this.props.rocket, event.target.value, this.props.noRockets);
     }
 
     render() {
       const rocket = this.props.rocket;
-      return <span>{(this.props.index!==0?", ":"")}<input type="number" value={this.props.noRockets} onChange={this.handleNoRocketChange}/>
+      return <div>
+      <input type="number" value={this.props.noRockets} onChange={this.handleNoRocketChange}/>
       <select value={rocket} onChange={this.handleRocketTypeChange}>
          {this.props.lec.getEngines().map((rocket, index) => {
           return <option value={rocket} key={index}>{rocket}</option>
         })
        }
-      </select></span>
+      </select></div>
     }
 }
 
@@ -46,12 +46,21 @@ class Step extends Component {
     this.handleDifficultyChange = this.handleDifficultyChange.bind(this);
     this.handleStepTypeChange = this.handleStepTypeChange.bind(this);
     this.handleTimeChange = this.handleTimeChange.bind(this);
+    this.handleRocketChange = this.handleRocketChange.bind(this);
+    this.handleMassChange = this.handleMassChange.bind(this);
   }
 
   capitalize(str) {
     return str[0].toUpperCase() + str.slice(1)
   }
 
+  handleMassChange(event) {
+    this.props.step.mass=parseInt(event.target.value);
+    if (isNaN(this.props.step.mass)) {
+      this.props.step.mass=0;
+    }
+    this.props.onPlanChange(this.props.step);
+  }
 
   handleDifficultyChange(event) {
     this.props.step.difficulty=event.target.value;
@@ -71,6 +80,16 @@ class Step extends Component {
     this.props.onPlanChange(this.props.step);
   }
 
+  handleRocketChange(rocketfrom,rocketto,no) {
+    if (rocketfrom===rocketto) {
+      this.props.step.rockets[rocketfrom]=no;
+      this.props.onPlanChange(this.props.step);
+    } else {
+      delete this.props.step.rockets[rocketfrom]
+      this.props.step.rockets[rocketto]=no;
+      this.props.onPlanChange(this.props.step);
+    }
+  }
 
 
   renderRocketList(rockets, editable=false) {
@@ -84,7 +103,8 @@ class Step extends Component {
     return (
       <tr>
 
-      <td>{step.index}.
+      <td>{step.index}.</td>
+      <td>
       <select value={step.step} onChange={this.handleStepTypeChange} >
        <option value="add">Add</option>
        <option value="burn">Burn</option>
@@ -95,10 +115,11 @@ class Step extends Component {
       <td>{(step.time!==undefined && <input type="number" value={step.time} onChange={this.handleTimeChange} /> ) || "N/A"}</td>
       <td>{step.currentMass}</td>
       <td>{Object.keys(step.rockets).map((rocket, index) => {
-        return <Rocket key={index} index={index} rocket={rocket} noRockets={step.rockets[rocket]} lec={this.props.lec} />
+        return <Rocket key={index} index={index} rocket={rocket} noRockets={step.rockets[rocket]} lec={this.props.lec} onChange={this.handleRocketChange} />
       })}
       </td>
-      <td>{step.step==="burn" && (<span>{step.totalThrust.toFixed(2)}({step.spareThrust.toFixed(2)})</span>)}</td>
+      <td><input type="number" value={step.mass}  onChange={this.handleMassChange} /></td>
+      <td>{step.step==="burn" && (<span>{step.totalThrust.toFixed(0)}({step.spareThrust.toFixed(0)})</span>)}</td>
       <td>{(step.error===undefined
          && this.renderRocketList(step.currentRockets))
          || (<span className="error">{step.error}</span>)}</td>
@@ -133,12 +154,14 @@ class App extends Component {
       <thead>
       <tr>
       <th>Step</th>
+      <th>Move</th>
       <th>Difficulty</th>
       <th>Time</th>
       <th>Mass after step</th>
-      <th>Rockets changed</th>
+      <th>Rockets &Delta;</th>
+      <th>Mass &Delta;</th>
       <th>Total thrust(Spare)</th>
-      <th>Note</th>
+      <th>Notes</th>
       </tr>
       </thead>
       <tbody>
@@ -147,8 +170,8 @@ class App extends Component {
       <tfoot>
        <tr>
        {(data.error === undefined
-         && <td colSpan="6" className="success">Success</td>)
-         || <td colSpan="6" className="error">{data.error}</td>}
+         && <td colSpan="9" className="success">Success</td>)
+         || <td colSpan="9" className="error">Error: {data.error}</td>}
         </tr>
       </tfoot>
       </table>

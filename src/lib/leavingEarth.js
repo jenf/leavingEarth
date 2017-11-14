@@ -43,6 +43,10 @@ class LeavingEarthCalculator {
                 for (const key of Object.keys(x.rockets)) {
                   if (x.step==="burn") {
                     if (!this.engines.rockets[key].singleUse) {
+                      if (!(currentRockets[key] > 0)) {
+                        success = false;
+                        x.error = "More "+key+" rockets used than onboard";
+                      }
                       continue;
                     }
                   }

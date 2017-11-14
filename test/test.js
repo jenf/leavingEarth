@@ -157,5 +157,21 @@ describe("Calculate", () => {
       assert.equal(data.steps[1].error, undefined);
 
     });
+
+    it("Burning ion thrusters when non-exist should error", () => {
+      var data={ "steps" : [
+        { "step" : "add", "mass" : 10},
+        { "step" : "burn", "rockets": {"ion": 1}, "time":3, "difficulty":1}
+      ] };
+      var lec = new LeavingEarthCalculator(engines);
+      assert.equal(lec.calculatePlan(data), false);
+      assert.equal(data.steps[0].currentMass, 10);
+      assert.equal(data.steps[1].currentMass, 10); // Ion rockets are not single use.
+      assert.equal(data.steps[1].totalThrust, 14)
+      assert.equal(data.steps[1].spareThrust, 4);
+      assert.notEqual(data.steps[1].error, undefined);
+
+    });
+
   });
 });
