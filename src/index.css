@@ -27,12 +27,12 @@ tr {
 }
 
 tr:nth-child(even) {
-  background-color: #ccc;
+  background-color: #eee;
 
 }
 
-td {
-  border: 1px solid black;
+th, td {
+  border: 1px solid #aaa;
 }
 
 button {

@@ -73,7 +73,7 @@ class LeavingEarthCalculator {
                 x.spareThrust = thrust-(originalMass-mass);
                 if (x.spareThrust < 0) {
                   success = false;
-                  if (x.error == undefined) {
+                  if (x.error === undefined) {
                     x.error = "Thrust needs to be greater than 0";
                   }
                 }
@@ -86,7 +86,7 @@ class LeavingEarthCalculator {
           x.currentMass=currentMass;
           if (x.currentMass < 0) {
             success = false;
-            if (x.error == undefined) {
+            if (x.error === undefined) {
               x.error = "Mass is less than 0";
             }
           }

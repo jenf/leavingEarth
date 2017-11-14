@@ -73,7 +73,6 @@ class Step extends Component {
 
   handleTimeChange(event) {
     this.props.step.time=event.target.value;
-
     this.props.onPlanChange(this.props.step);
   }
 
@@ -124,7 +123,7 @@ class Step extends Component {
     const step = this.props.step;
     return (
       <tr>
-      <td><button onClick={this.handleAddStep}>+</button>{step.index}.</td>
+      <td><button className="add" onClick={this.handleAddStep}>+</button>{step.index}.</td>
       <td>
       <select value={step.step} onChange={this.handleStepTypeChange} >
        <option value="add">Add</option>
@@ -138,7 +137,7 @@ class Step extends Component {
       <td>{Object.keys(step.rockets).map((rocket, index) => {
         return <Rocket key={index} index={index} rocket={rocket} noRockets={step.rockets[rocket]} lec={this.props.lec} onChange={this.handleRocketChange} />
       })}
-      <button onClick={this.handleAddRocket}>+</button>
+      <button className="add" onClick={this.handleAddRocket}>+</button>
       </td>
       <td><input type="number" value={step.mass}  onChange={this.handleMassChange} /></td>
       <td>{step.step==="burn" && (<span>{step.totalThrust.toFixed(0)}({step.spareThrust.toFixed(0)})</span>)}</td>
@@ -154,27 +153,42 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.lec = new LeavingEarth.LeavingEarthCalculator(engines);
+    if (localStorage.getItem("plan")) {
+      const d=JSON.parse(localStorage.getItem("plan"));
+      if (d!=undefined) {
+        data=d;
+      }
+    }
+
     this.lec.calculatePlan(data);
-    this.state = {plan: data};
+
+    this.state = {plan: data, history: [JSON.parse(JSON.stringify(data))], stepNumber: 0};
     this.handlePlanChange=this.handlePlanChange.bind(this);
     this.handleAddStep=this.handleAddStep.bind(this);
     this.handleAddStepEnd=this.handleAddStepEnd.bind(this);
+    this.handleUndo=this.handleUndo.bind(this);
   }
 
+  setPlan(plan) {
+    this.lec.calculatePlan(data);
+    const history = this.state.history.slice(0, this.state.stepNumber + 1).concat(JSON.parse(JSON.stringify(data)));
+    this.setState({plan: data,
+       history: history,
+       stepNumber: history.length-1,
+     });
+  }
   handlePlanChange(plan) {
     data = JSON.parse(JSON.stringify(this.state.plan));
 
     data.steps[plan.index-1]=plan;
-    this.lec.calculatePlan(data);
-    this.setState({plan: data});
+    this.setPlan(data);
   }
 
   handleAddStep(step) {
     data = JSON.parse(JSON.stringify(this.state.plan));
 
     data.steps.splice(step-1, 0, { "step" : "add", "mass" : 0, "rockets":{}})
-    this.lec.calculatePlan(data);
-    this.setState({plan: data});
+    this.setPlan(data);
   }
 
   handleAddStepEnd(event) {
@@ -182,11 +196,23 @@ class App extends Component {
     this.handleAddStep(data.steps.length+1);
   }
 
+  handleUndo(event) {
+    event.preventDefault();
+    if (this.state.stepNumber!=0) {
+      const plan = this.state.history[this.state.stepNumber-1];
+      this.setState({plan: plan, stepNumber:this.state.stepNumber-1})
+    }
+  }
+
   render() {
+    if (this.state.plan!=undefined) {
+      localStorage.setItem("plan", JSON.stringify(this.state.plan));
+    }
     var data = this.state.plan;
 
     return (
       <form onSubmit={this.handleSubmit}>
+
       <table className="App">
       <thead>
       <tr>
@@ -206,7 +232,8 @@ class App extends Component {
       </tbody>
       <tfoot>
        <tr>
-        <td><button onClick={this.handleAddStepEnd}>+</button></td>
+        <td><button className="add" onClick={this.handleAddStepEnd}>+</button></td>
+        <td ><div style={{display:"none"}}><button onClick={this.handleUndo}>Undo</button> <button>Redo</button> <button>Clear</button></div></td>
        {(data.error === undefined
          && <td colSpan="8" className="success">Success</td>)
          || <td colSpan="8" className="error">Error: {data.error}</td>}
