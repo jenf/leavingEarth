@@ -34,3 +34,10 @@ tr:nth-child(even) {
 td {
   border: 1px solid black;
 }
+
+button {
+    color: white;
+    border-radius: 8px;
+    background: #0078e7;
+    border: 1px #0078e7;
+}

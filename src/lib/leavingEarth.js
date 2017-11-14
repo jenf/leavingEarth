@@ -4,7 +4,7 @@ class LeavingEarthCalculator {
   }
 
   getEngines() {
-    return Object.keys(this.engines.rockets);
+    return Object.keys(this.engines.rockets).sort();
   }
 
   calculatePlan(plan) {
@@ -73,7 +73,9 @@ class LeavingEarthCalculator {
                 x.spareThrust = thrust-(originalMass-mass);
                 if (x.spareThrust < 0) {
                   success = false;
-                  x.error = "Thrust needs to be greater than 0";
+                  if (x.error == undefined) {
+                    x.error = "Thrust needs to be greater than 0";
+                  }
                 }
               }
               break;
@@ -84,7 +86,9 @@ class LeavingEarthCalculator {
           x.currentMass=currentMass;
           if (x.currentMass < 0) {
             success = false;
-            x.error = "Mass is less than 0";
+            if (x.error == undefined) {
+              x.error = "Mass is less than 0";
+            }
           }
           x.currentRockets=Object.assign({}, currentRockets);
           x.index=index;

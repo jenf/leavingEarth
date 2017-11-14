@@ -6,8 +6,8 @@ import pluralize from 'pluralize';
 pluralize.addIrregularRule("soyuz", "soyuzes")
 
 var data={ "steps" : [
-  { "step" : "add", "mass" : 0, "rockets":{"soyuz":3,"saturn":1}},
-  { "step" : "burn", "rockets": {"soyuz":4}, "difficulty":3, "time":1}
+  { "step" : "add", "mass" : 1, "rockets":{"juno":3}},
+  { "step" : "burn", "rockets": {"juno":3}, "difficulty":3, "time":1}
 ] };
 
 class Rocket extends Component {
@@ -48,6 +48,8 @@ class Step extends Component {
     this.handleTimeChange = this.handleTimeChange.bind(this);
     this.handleRocketChange = this.handleRocketChange.bind(this);
     this.handleMassChange = this.handleMassChange.bind(this);
+    this.handleAddStep = this.handleAddStep.bind(this);
+    this.handleAddRocket = this.handleAddRocket.bind(this);
   }
 
   capitalize(str) {
@@ -55,7 +57,7 @@ class Step extends Component {
   }
 
   handleMassChange(event) {
-    this.props.step.mass=parseInt(event.target.value);
+    this.props.step.mass=parseInt(event.target.value,10);
     if (isNaN(this.props.step.mass)) {
       this.props.step.mass=0;
     }
@@ -85,10 +87,30 @@ class Step extends Component {
       this.props.step.rockets[rocketfrom]=no;
       this.props.onPlanChange(this.props.step);
     } else {
+      if (rocketto in this.props.step.rockets) {
+        no+=this.props.step.rockets[rocketto];
+      }
       delete this.props.step.rockets[rocketfrom]
       this.props.step.rockets[rocketto]=no;
       this.props.onPlanChange(this.props.step);
     }
+  }
+
+  handleAddRocket(event) {
+    event.preventDefault();
+    for (let rocket of this.props.lec.getEngines()) {
+      if (!(rocket in this.props.step.rockets)) {
+        this.props.step.rockets[rocket]=0;
+        this.props.onPlanChange(this.props.step);
+        break;
+      }
+    }
+  }
+
+  handleAddStep(event) {
+    event.preventDefault();
+    this.props.onAddStep(this.props.step.index);
+
   }
 
 
@@ -102,8 +124,7 @@ class Step extends Component {
     const step = this.props.step;
     return (
       <tr>
-
-      <td>{step.index}.</td>
+      <td><button onClick={this.handleAddStep}>+</button>{step.index}.</td>
       <td>
       <select value={step.step} onChange={this.handleStepTypeChange} >
        <option value="add">Add</option>
@@ -112,11 +133,12 @@ class Step extends Component {
       </select>
       </td>
       <td>{(step.step==="burn" && <input type="number" value={step.difficulty} onChange={this.handleDifficultyChange} />) || "N/A"}</td>
-      <td>{(step.time!==undefined && <input type="number" value={step.time} onChange={this.handleTimeChange} /> ) || "N/A"}</td>
+      <td>{(step.step==="burn" && <input type="number" value={step.time} onChange={this.handleTimeChange} /> ) || "N/A"}</td>
       <td>{step.currentMass}</td>
       <td>{Object.keys(step.rockets).map((rocket, index) => {
         return <Rocket key={index} index={index} rocket={rocket} noRockets={step.rockets[rocket]} lec={this.props.lec} onChange={this.handleRocketChange} />
       })}
+      <button onClick={this.handleAddRocket}>+</button>
       </td>
       <td><input type="number" value={step.mass}  onChange={this.handleMassChange} /></td>
       <td>{step.step==="burn" && (<span>{step.totalThrust.toFixed(0)}({step.spareThrust.toFixed(0)})</span>)}</td>
@@ -135,6 +157,8 @@ class App extends Component {
     this.lec.calculatePlan(data);
     this.state = {plan: data};
     this.handlePlanChange=this.handlePlanChange.bind(this);
+    this.handleAddStep=this.handleAddStep.bind(this);
+    this.handleAddStepEnd=this.handleAddStepEnd.bind(this);
   }
 
   handlePlanChange(plan) {
@@ -143,6 +167,19 @@ class App extends Component {
     data.steps[plan.index-1]=plan;
     this.lec.calculatePlan(data);
     this.setState({plan: data});
+  }
+
+  handleAddStep(step) {
+    data = JSON.parse(JSON.stringify(this.state.plan));
+
+    data.steps.splice(step-1, 0, { "step" : "add", "mass" : 0, "rockets":{}})
+    this.lec.calculatePlan(data);
+    this.setState({plan: data});
+  }
+
+  handleAddStepEnd(event) {
+    event.preventDefault();
+    this.handleAddStep(data.steps.length+1);
   }
 
   render() {
@@ -160,18 +197,19 @@ class App extends Component {
       <th>Mass after step</th>
       <th>Rockets &Delta;</th>
       <th>Mass &Delta;</th>
-      <th>Total thrust(Spare)</th>
+      <th>Thrust(Spare)</th>
       <th>Notes</th>
       </tr>
       </thead>
       <tbody>
-      {data.steps.map((step,index) => { return <Step onPlanChange={this.handlePlanChange} key={index} step={step} lec={this.lec} />}) }
+      {data.steps.map((step,index) => { return <Step onPlanChange={this.handlePlanChange} onAddStep={this.handleAddStep} key={index} step={step} lec={this.lec} />}) }
       </tbody>
       <tfoot>
        <tr>
+        <td><button onClick={this.handleAddStepEnd}>+</button></td>
        {(data.error === undefined
-         && <td colSpan="9" className="success">Success</td>)
-         || <td colSpan="9" className="error">Error: {data.error}</td>}
+         && <td colSpan="8" className="success">Success</td>)
+         || <td colSpan="8" className="error">Error: {data.error}</td>}
         </tr>
       </tfoot>
       </table>
