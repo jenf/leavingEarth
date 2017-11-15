@@ -38,26 +38,34 @@ class LeavingEarthCalculator {
                 currentMass-=x.mass;
               }
               var originalMass = currentMass;
-
+              var actualBurn = false;
               if (x.rockets!== undefined) {
                 for (const key of Object.keys(x.rockets)) {
+                  var availableRockets = currentRockets[key];
+                  if (availableRockets == undefined) {
+                    availableRockets = 0;
+                  }
+                  var usedRockets = x.rockets[key];
+                  if (usedRockets === 0) {
+                    continue;
+                  }
+                  actualBurn = true;
                   if (x.step==="burn") {
                     if (!this.engines.rockets[key].singleUse) {
-                      if (!(currentRockets[key] > 0)) {
-                        success = false;
+
+                      if (availableRockets < usedRockets) {
                         x.error = "More "+key+" rockets used than onboard";
                       }
                       continue;
                     }
                   }
                   if (key in currentRockets) {
-                    currentRockets[key]-=x.rockets[key];
+                    currentRockets[key]-=usedRockets;
                   }
                   else {
-                    currentRockets[key]=-x.rockets[key];
+                    currentRockets[key]=-usedRockets;
                   }
                   if (currentRockets[key] < 0) {
-                    success = false;
                     x.error = "More "+key+" rockets used than onboard";
                   }
                   currentMass-=this.engines.rockets[key].weight*x.rockets[key];
@@ -68,39 +76,41 @@ class LeavingEarthCalculator {
                 if (time === undefined) {
                   time=1;
                 }
-                var [thrust, mass] = this.calculateThrustAndMass(x.rockets, x.difficulty, time);
-                x.totalThrust = thrust;
-                x.spareThrust = thrust-(originalMass-mass);
-                if (x.spareThrust < 0) {
-                  success = false;
-                  if (x.error === undefined) {
-                    x.error = "Thrust needs to be greater than 0";
+                if (actualBurn) {
+                  var [thrust, mass] = this.calculateThrustAndMass(x.rockets, x.difficulty, time);
+                  x.totalThrust = thrust;
+                  x.spareThrust = thrust-(originalMass-mass);
+                  if (x.spareThrust < 0) {
+                    if (x.error === undefined) {
+                      x.error = "Thrust needs to be greater than 0";
+                    }
                   }
                 }
               }
               break;
           default:
-            console.log("Unknown plan step "+x.step);
+            x.error = "Unknown plan step "+x.step;
           }
 
           x.currentMass=currentMass;
           if (x.currentMass < 0) {
-            success = false;
             if (x.error === undefined) {
               x.error = "Mass is less than 0";
             }
           }
           x.currentRockets=Object.assign({}, currentRockets);
           x.index=index;
-          if (success=== false && plan.error===undefined) {
+          if (x.error !==undefined && plan.error===undefined) {
+            success=false;
             plan.error=index+": "+x.error;
+            //console.log(x.error);
           }
           index++
       });
       return success;
   }
 
-  getEngineThrustMass(selEngine, difficulty, number, time=1) {
+  getEngineThrustMass(selEngine, difficulty, number, time) {
       var engine = this.engines.rockets[selEngine];
       var engineThrust = engine.difficulty[difficulty-1];
       console.log("Thrust "+engineThrust);

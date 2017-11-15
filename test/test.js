@@ -125,7 +125,7 @@ describe("Calculate", () => {
 
     it("Removing non-existant rockets should return failure", () => {
       var data={ "steps" : [
-        { "step" : "add", "mass" : 0, "rockets":{"soyuz":3,"saturn":1}},
+        { "step" : "add", "rockets":{"soyuz":3,"saturn":1}},
         { "step" : "remove", "mass": 1,  "rockets": {"soyuz": 4, "juno": 1}},
         { "step" : "remove", "mass": 1,  "rockets": {"saturn": 1}}
       ] };
@@ -172,6 +172,38 @@ describe("Calculate", () => {
       assert.notEqual(data.steps[1].error, undefined);
 
     });
+    it("Burning 0 ion thrusters and 0 soyuz should not error when non-exist", () => {
+      var data={ "steps" : [
+        { "step" : "add", "mass" : 10},
+        { "step" : "burn", "rockets": {"ion": 0, "soyuz":0}, "time":3, "difficulty":1}
+      ] };
+      var lec = new LeavingEarthCalculator(engines);
+      assert.equal(lec.calculatePlan(data), true);
+      assert.equal(data.steps[0].currentMass, 10);
+      assert.equal(data.steps[1].currentMass, 10); // Ion rockets are not single use.
+      assert.equal(data.steps[1].error, undefined);
 
+    });
+    it("Plan with unknown step should error", () => {
+      var data={ "steps" : [
+        { "step" : "add", "mass" : 10},
+        { "step" : "fred", "rockets": {"ion": 0, "soyuz":0}, "time":3, "difficulty":1}
+      ] };
+      var lec = new LeavingEarthCalculator(engines);
+      assert.equal(lec.calculatePlan(data), false);
+      assert.notEqual(data.steps[1].error, undefined);
+    });
+    it("Burning -1 ion thrusters should error", () => {
+      var data={ "steps" : [
+        { "step" : "add", "mass" : 10},
+        { "step" : "burn", "rockets": {"ion": -1}, "mass":11, "time":3, "difficulty":1}
+      ] };
+      var lec = new LeavingEarthCalculator(engines);
+      assert.equal(lec.calculatePlan(data), false);
+      assert.equal(data.steps[0].currentMass, 10);
+      assert.equal(data.steps[1].currentMass, -1); // Ion rockets are not single use.
+      assert.notEqual(data.steps[1].error, undefined);
+
+    });
   });
 });
