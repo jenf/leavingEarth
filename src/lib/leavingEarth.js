@@ -38,7 +38,6 @@ class LeavingEarthCalculator {
                 currentMass-=x.mass;
               }
               var originalMass = currentMass;
-
               if (x.rockets!== undefined) {
                 for (const key of Object.keys(x.rockets)) {
                   if (x.step==="burn") {
