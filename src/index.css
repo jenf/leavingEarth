@@ -1,9 +1,13 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: sans-serif;
+
 }
 
+body {
+    font-family: Futura, "Trebuchet MS", Arial, sans-serif;
+    font-size: 12px;
+}
 .error {
   color: red;
   font-weight: bold;
@@ -22,6 +26,14 @@ table {
   border-collapse: collapse;
 }
 
+th {
+    font-variant: small-caps;
+}
+
+.nice {
+      font-variant: small-caps;
+      text-transform: capitalize;
+}
 tr {
   padding: 5px;
 }
@@ -33,6 +45,8 @@ tr:nth-child(even) {
 
 th, td {
   border: 1px solid #aaa;
+
+
 }
 
 button {
@@ -40,4 +54,10 @@ button {
     border-radius: 8px;
     background: #0078e7;
     border: 1px #0078e7;
+    margin: 5px;
+    padding: 5px;
+}
+
+.inactive {
+  display: none;
 }
