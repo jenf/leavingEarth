@@ -131,7 +131,7 @@ class Step extends Component {
         return <Rocket key={index} index={index} rocket={rocket} noRockets={step.rockets[rocket]} lec={this.props.lec} onChange={this.handleRocketChange} />
       })}
       {
-        (step.step==="burn" && (<span>Total:{step.totalThrust?step.totalThrust.toFixed(0):"NaN"} Spare:{step.spareThrust?step.spareThrust.toFixed(0):"NaN"}</span>))
+        (step.step==="burn" && (<span>Total:{step.totalThrust!==undefined?step.totalThrust.toFixed(1):"NaN"} Spare:{step.spareThrust!==undefined?step.spareThrust.toFixed(1):"NaN"}</span>))
       }
       <button className="add" onClick={this.handleAddRocket}>+</button>
       </td>
