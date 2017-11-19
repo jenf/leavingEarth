@@ -1,10 +1,24 @@
 class LeavingEarthCalculator {
   constructor(engines) {
     this.engines=engines;
+    for (let engine of Object.keys(this.engines.rockets)) {
+      if (!this.engines.rockets[engine].printable) {
+        this.engines.rockets[engine].printable=engine[0].toUpperCase() + engine.slice(1);
+      }
+    }
   }
 
-  getEngines() {
-    return Object.keys(this.engines.rockets).sort();
+  getEngine(engine) {
+    return this.engines.rockets[engine];
+  }
+  getEngines(burnable=true) {
+    var rockets=Object.keys(this.engines.rockets).sort();
+    if (burnable) {
+      return rockets.filter(x => {
+        return this.engines.rockets[x].rocket!==false;
+      });
+    }
+    return rockets;
   }
 
   calculatePlan(plan) {
@@ -66,7 +80,7 @@ class LeavingEarthCalculator {
                     currentRockets[key]=-usedRockets;
                   }
                   if (currentRockets[key] < 0) {
-                    x.error = "More "+key+" rockets used than onboard";
+                    x.error = "More "+this.engines.rockets[key].printable+" "+(x.step==="burn"?"burnt":"removed")+" than onboard";
                   }
                   currentMass-=this.engines.rockets[key].weight*x.rockets[key];
                 }

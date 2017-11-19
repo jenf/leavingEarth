@@ -55,6 +55,23 @@
       "singleUse": false,
       "uses": "smallFuelTank",
       "difficulty": [12, 4.5, 2, 0.75]
+    },
+    "largeFuelTank" : {
+      "printable": "Large Fuel Tank",
+      "expansion": "stations",
+      "weight": 4,
+      "rocket": false
+    },
+    "smallFuelTank": {
+      "printable": "Small Fuel Tank",
+      "expansion": "stations",
+      "weight": 2,
+      "rocket": false
+    },
+    "otherMass" : {
+      "printable": "Other Mass",
+      "weight": 1,
+      "rocket":false
     }
   }
 }

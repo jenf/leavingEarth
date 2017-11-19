@@ -6,8 +6,14 @@ var assert = require('assert');
 
 describe("Calculate", () => {
   describe("#getEngines", () => {
+    it("Should return all engines and other things when filter is false", () => {
     var lec = new LeavingEarthCalculator(engines);
-    assert.deepEqual(lec.getEngines().sort(), ["juno","atlas","soyuz","saturn","proton","ion"].sort());
+    assert.deepEqual(lec.getEngines(false).sort(), ["juno","atlas","soyuz","saturn","proton","ion", "shuttle", "daedalus", "otherMass","largeFuelTank", "smallFuelTank"].sort());
+    });
+      it("Should return all engines when filter is true", () => {
+      var lec = new LeavingEarthCalculator(engines);
+      assert.deepEqual(lec.getEngines(true).sort(), ["juno","atlas","soyuz","saturn","proton","ion", "shuttle", "daedalus"].sort());
+      });
   });
 
   describe("#calculateThrust", () => {

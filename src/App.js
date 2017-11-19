@@ -31,8 +31,8 @@ class Rocket extends Component {
       return <div>
       <input type="number" value={this.props.noRockets} onChange={this.handleNoRocketChange}/>
       <select value={rocket} onChange={this.handleRocketTypeChange}>
-         {this.props.lec.getEngines().map((rocket, index) => {
-          return <option value={rocket} key={index}>{rocket}</option>
+         {this.props.lec.getEngines(this.props.step==="burn").map((rocket, index) => {
+          return <option value={rocket} key={index}>{this.props.lec.getEngine(rocket).printable}</option>
         })
        }
       </select></div>
@@ -47,21 +47,12 @@ class Step extends Component {
     this.handleStepTypeChange = this.handleStepTypeChange.bind(this);
     this.handleTimeChange = this.handleTimeChange.bind(this);
     this.handleRocketChange = this.handleRocketChange.bind(this);
-    this.handleMassChange = this.handleMassChange.bind(this);
     this.handleAddStep = this.handleAddStep.bind(this);
     this.handleAddRocket = this.handleAddRocket.bind(this);
   }
 
   capitalize(str) {
     return str[0].toUpperCase() + str.slice(1)
-  }
-
-  handleMassChange(event) {
-    this.props.step.mass=parseInt(event.target.value,10);
-    if (isNaN(this.props.step.mass)) {
-      this.props.step.mass=0;
-    }
-    this.props.onPlanChange(this.props.step);
   }
 
   handleDifficultyChange(event) {
@@ -109,7 +100,6 @@ class Step extends Component {
   handleAddStep(event) {
     event.preventDefault();
     this.props.onAddStep(this.props.step.index);
-
   }
 
   render() {
@@ -128,19 +118,18 @@ class Step extends Component {
       <td>{(step.step==="burn" && <input type="number" value={step.difficulty} onChange={this.handleDifficultyChange} />) || "N/A"}</td>
       <td>{(step.step==="burn" && <input type="number" value={step.time} onChange={this.handleTimeChange} /> ) || "N/A"}</td>
       <td>{Object.keys(step.rockets).map((rocket, index) => {
-        return <Rocket key={index} index={index} rocket={rocket} noRockets={step.rockets[rocket]} lec={this.props.lec} onChange={this.handleRocketChange} />
+        return <Rocket step={step.step} key={index} index={index} rocket={rocket} noRockets={step.rockets[rocket]} lec={this.props.lec} onChange={this.handleRocketChange} />
       })}
       {
-        (step.step==="burn" && (<span>Total:{step.totalThrust!==undefined?step.totalThrust.toFixed(1):"NaN"} Spare:{step.spareThrust!==undefined?step.spareThrust.toFixed(1):"NaN"}</span>))
+        (step.step==="burn" && (<span>Total:{step.totalThrust!=undefined?step.totalThrust.toFixed(1):"NaN"} Spare:{step.spareThrust!=undefined?step.spareThrust.toFixed(1):"NaN"}</span>))
       }
       <button className="add" onClick={this.handleAddRocket}>+</button>
       </td>
-      <td><input type="number" value={step.mass}  onChange={this.handleMassChange} /></td>
       <td class="nice">
-        <div>Mass: {step.currentMass}</div>
         {Object.keys(step.currentRockets).map((rocket, index) => {
-          return <div className="nice">{rocket} : {step.currentRockets[rocket]}</div>;
+          return <div className="nice">{this.props.lec.getEngine(rocket).printable} : {step.currentRockets[rocket]}</div>;
         })}
+        <div>Total Mass: {step.currentMass}</div>
         {
           (step.error!==undefined && (<div className="error">{step.error}</div>))
         }
@@ -267,7 +256,6 @@ class App extends Component {
       <th>Move</th>
       <th>Diff.</th>
       <th>Time</th>
-      <th>Rockets &Delta;</th>
       <th>Mass &Delta;</th>
       <th>Notes</th>
       </tr>
