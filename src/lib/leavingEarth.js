@@ -52,9 +52,11 @@ class LeavingEarthCalculator {
                 currentMass-=x.mass;
               }
               var originalMass = currentMass;
+              var excludedMass = 0;
               var actualBurn = false;
               if (x.rockets!== undefined) {
-                for (const key of Object.keys(x.rockets)) {
+                for (var key of Object.keys(x.rockets)) {
+                  const originalKey = key;
                   var availableRockets = currentRockets[key];
                   if (availableRockets == undefined) {
                     availableRockets = 0;
@@ -70,7 +72,15 @@ class LeavingEarthCalculator {
                       if (availableRockets < usedRockets) {
                         x.error = "More "+key+" rockets used than onboard";
                       }
-                      continue;
+                      // Engines that are single use do not count towards the mass needed
+                      excludedMass+=this.engines.rockets[key].weight*x.rockets[key];
+                      if (this.engines.rockets[key].uses!=undefined) {
+                        key = this.engines.rockets[key].uses;
+                        // Because the getEngineThrustMass() function doesn't know about the fuel tanks, exclude them here
+                        excludedMass+=this.engines.rockets[key].weight*x.rockets[originalKey];
+                      } else {
+                        continue;
+                      }
                     }
                   }
                   if (key in currentRockets) {
@@ -82,7 +92,7 @@ class LeavingEarthCalculator {
                   if (currentRockets[key] < 0) {
                     x.error = "More "+this.engines.rockets[key].printable+" "+(x.step==="burn"?"burnt":"removed")+" than onboard";
                   }
-                  currentMass-=this.engines.rockets[key].weight*x.rockets[key];
+                  currentMass-=this.engines.rockets[key].weight*x.rockets[originalKey];
                 }
               }
               if (x.step==='burn') {
@@ -93,7 +103,7 @@ class LeavingEarthCalculator {
                 if (actualBurn) {
                   var [thrust, mass] = this.calculateThrustAndMass(x.rockets, x.difficulty, time);
                   x.totalThrust = thrust;
-                  x.spareThrust = thrust-(originalMass-mass);
+                  x.spareThrust = thrust-(originalMass-(mass+excludedMass));
                   if (x.spareThrust < 0) {
                     if (x.error === undefined) {
                       x.error = "Thrust needs to be greater than 0";
@@ -126,6 +136,9 @@ class LeavingEarthCalculator {
 
   getEngineThrustMass(selEngine, difficulty, number, time) {
       var engine = this.engines.rockets[selEngine];
+      if (engine.rocket === false) {
+        return [0,0];
+      }
       var engineThrust = engine.difficulty[difficulty-1];
       console.log("Thrust "+engineThrust);
       if (Array.isArray(engineThrust)) {

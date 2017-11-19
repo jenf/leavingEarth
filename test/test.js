@@ -159,7 +159,24 @@ describe("Calculate", () => {
       assert.equal(data.steps[1].currentMass, 11); // Ion rockets are not single use.
       assert.deepEqual(data.steps[1].currentRockets, {"ion":1});
       assert.equal(data.steps[1].totalThrust, 14)
-      assert.equal(data.steps[1].spareThrust, 3);
+      assert.equal(data.steps[1].spareThrust, 4);
+      assert.equal(data.steps[1].error, undefined);
+
+    });
+
+    it("An shuttle should lift mass and remove largeFuelTanks", () => {
+      var data={ "steps" : [
+        { "step" : "add", "mass" : 0, "rockets":{"shuttle":1, "largeFuelTank":2}},
+        { "step" : "burn", "rockets": {"shuttle": 1}, "difficulty":1}
+      ] };
+      var lec = new LeavingEarthCalculator(engines);
+      assert.equal(lec.calculatePlan(data), true);
+      assert.equal(data.steps[0].currentMass, 12);
+      assert.deepEqual(data.steps[0].currentRockets, {"shuttle":1, "largeFuelTank":2});
+      assert.equal(data.steps[1].currentMass, 8); // Shuttles are not single use, but the fuel tanks are
+      assert.deepEqual(data.steps[1].currentRockets, {"shuttle":1, "largeFuelTank":1});
+      assert.equal(data.steps[1].totalThrust, 67)
+      assert.equal(data.steps[1].spareThrust, (67-4));
       assert.equal(data.steps[1].error, undefined);
 
     });
@@ -174,7 +191,7 @@ describe("Calculate", () => {
       assert.equal(data.steps[0].currentMass, 10);
       assert.equal(data.steps[1].currentMass, 10); // Ion rockets are not single use.
       assert.equal(data.steps[1].totalThrust, 14)
-      assert.equal(data.steps[1].spareThrust, 4);
+      assert.equal(data.steps[1].spareThrust, 5);
       assert.notEqual(data.steps[1].error, undefined);
 
     });
