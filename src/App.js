@@ -18,7 +18,7 @@ class Rocket extends Component {
     }
 
     handleNoRocketChange(event) {
-      this.props.onChange(this.props.rocket, parseInt(this.props.rocket, 10), event.target.value);
+      this.props.onChange(this.props.rocket, this.props.rocket, parseInt(event.target.value, 10));
     }
 
     handleRocketTypeChange(event) {
@@ -29,7 +29,7 @@ class Rocket extends Component {
     render() {
       const rocket = this.props.rocket;
       return <div>
-      <input type="number" value={this.props.noRockets} onChange={this.handleNoRocketChange}/>
+      <input min="0" type="number" value={this.props.noRockets} onChange={this.handleNoRocketChange}/>
       <select value={rocket} onChange={this.handleRocketTypeChange}>
          {this.props.lec.getEngines(this.props.step==="burn").map((rocket, index) => {
           return <option value={rocket} key={index}>{this.props.lec.getEngine(rocket).printable}</option>
@@ -115,8 +115,8 @@ class Step extends Component {
        <option value="remove">Remove</option>
       </select>
       </td>
-      <td>{(step.step==="burn" && <input type="number" value={step.difficulty} onChange={this.handleDifficultyChange} />) || "N/A"}</td>
-      <td>{(step.step==="burn" && <input type="number" value={step.time} onChange={this.handleTimeChange} /> ) || "N/A"}</td>
+      <td>{(step.step==="burn" && <input min="1" max="11" type="number" value={step.difficulty} onChange={this.handleDifficultyChange} />) || "N/A"}</td>
+      <td>{(step.step==="burn" && <input min="1" max="11" type="number" value={step.time} onChange={this.handleTimeChange} /> ) || "N/A"}</td>
       <td>{Object.keys(step.rockets).map((rocket, index) => {
         return <Rocket step={step.step} key={index} index={index} rocket={rocket} noRockets={step.rockets[rocket]} lec={this.props.lec} onChange={this.handleRocketChange} />
       })}
