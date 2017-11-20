@@ -58,7 +58,7 @@ class LeavingEarthCalculator {
                 for (var key of Object.keys(x.rockets)) {
                   const originalKey = key;
                   var availableRockets = currentRockets[key];
-                  if (availableRockets == undefined) {
+                  if (availableRockets == undefined) { // eslint-disable-line eqeqeq
                     availableRockets = 0;
                   }
                   var usedRockets = x.rockets[key];
@@ -74,7 +74,7 @@ class LeavingEarthCalculator {
                       }
                       // Engines that are single use do not count towards the mass needed
                       excludedMass+=this.engines.rockets[key].weight*x.rockets[key];
-                      if (this.engines.rockets[key].uses!=undefined) {
+                      if (this.engines.rockets[key].uses!=undefined) {  // eslint-disable-line eqeqeq
                         key = this.engines.rockets[key].uses;
                         // Because the getEngineThrustMass() function doesn't know about the fuel tanks, exclude them here
                         excludedMass+=this.engines.rockets[key].weight*x.rockets[originalKey];
@@ -100,10 +100,20 @@ class LeavingEarthCalculator {
                 if (time === undefined) {
                   time=1;
                 }
+                if (x.difficulty == undefined) { // eslint-disable-line eqeqeq
+                    if (x.error === undefined) {
+                      x.error = "Difficulty is not set";
+                    }
+                }
                 if (actualBurn) {
-                  var [thrust, mass] = this.calculateThrustAndMass(x.rockets, x.difficulty, time);
+                  var [thrust, mass, error] = this.calculateThrustAndMass(x.rockets, x.difficulty, time);
+
+                  if (error.length!==0 && x.error === undefined) {
+                    x.error=error[0];
+                  }
                   x.totalThrust = thrust;
                   x.spareThrust = thrust-(originalMass-(mass+excludedMass));
+
                   if (x.spareThrust < 0) {
                     if (x.error === undefined) {
                       x.error = "Thrust needs to be greater than 0";
@@ -137,25 +147,31 @@ class LeavingEarthCalculator {
   getEngineThrustMass(selEngine, difficulty, number, time) {
       var engine = this.engines.rockets[selEngine];
       if (engine.rocket === false) {
-        return [0,0];
+        return [0,0, ["Attempting to burn a non-rocket"]];
+      }
+      if (!((difficulty-1) in engine.difficulty)) {
+        return [0,0, ["Cannot burn at difficulty "+(difficulty)+" for "+selEngine]];
       }
       var engineThrust = engine.difficulty[difficulty-1];
-      console.log("Thrust "+engineThrust);
+      //console.log("Thrust "+engineThrust);
       if (Array.isArray(engineThrust)) {
+        if (!((time-1) in engineThrust)) {
+          return [0,0, ["cannot burn for time "+(time)+" for "+selEngine]];
+        }
         engineThrust = engineThrust[time-1];
-        console.log(engineThrust);
       }
       var thrust = engineThrust*number;
       var mass = 0;
       if (engine.singleUse) {
         mass = engine.weight*number;
       }
-      return [thrust, mass];
+      return [thrust, mass, []];
   }
 
   calculateThrustAndMass(item, difficulty, time=1) {
       var sum=0;
       var mass=0;
+      var error=[];
       var selEngine = item;
       if (Array.isArray(item)) {
           if (typeof(item[0])==="number") {
@@ -165,8 +181,9 @@ class LeavingEarthCalculator {
                   var v=this.calculateThrustAndMass(i, difficulty, time);
                   sum+=v[0];
                   mass+=v[1];
+                  error = error.concat(v[2])
               });
-              return [sum,mass];
+              return [sum,mass,error];
           }
       } else if (typeof item === "string") {
         return this.getEngineThrustMass(selEngine, difficulty, 1, time)
@@ -175,8 +192,9 @@ class LeavingEarthCalculator {
              var v=this.getEngineThrustMass(key, difficulty, item[key], time);
              sum+=v[0];
              mass+=v[1];
+             error = error.concat(v[2])
           }
-          return [sum,mass];
+          return [sum,mass, error];
       }
   }
 }

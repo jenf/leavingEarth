@@ -18,7 +18,7 @@ class Rocket extends Component {
     }
 
     handleNoRocketChange(event) {
-      this.props.onChange(this.props.rocket, this.props.rocket, event.target.value);
+      this.props.onChange(this.props.rocket, parseInt(this.props.rocket, 10), event.target.value);
     }
 
     handleRocketTypeChange(event) {
@@ -56,14 +56,14 @@ class Step extends Component {
   }
 
   handleDifficultyChange(event) {
-    this.props.step.difficulty=event.target.value;
+    this.props.step.difficulty=parseInt(event.target.value, 10);
 
     this.props.onPlanChange(this.props.step);
   }
 
 
   handleTimeChange(event) {
-    this.props.step.time=event.target.value;
+    this.props.step.time=parseInt(event.target.value, 10);
     this.props.onPlanChange(this.props.step);
   }
 
@@ -121,13 +121,13 @@ class Step extends Component {
         return <Rocket step={step.step} key={index} index={index} rocket={rocket} noRockets={step.rockets[rocket]} lec={this.props.lec} onChange={this.handleRocketChange} />
       })}
       {
-        (step.step==="burn" && (<span>Total:{step.totalThrust!=undefined?step.totalThrust.toFixed(1):"NaN"} Spare:{step.spareThrust!=undefined?step.spareThrust.toFixed(1):"NaN"}</span>))
+        (step.step==="burn" && (<span>Total:{step.totalThrust!=undefined?step.totalThrust.toFixed(1):"NaN"} Spare:{step.spareThrust!=undefined?step.spareThrust.toFixed(1):"NaN"}</span>))  // eslint-disable-line eqeqeq
       }
       <button className="add" onClick={this.handleAddRocket}>+</button>
       </td>
-      <td class="nice">
+      <td className="nice">
         {Object.keys(step.currentRockets).map((rocket, index) => {
-          return <div className="nice">{this.props.lec.getEngine(rocket).printable} : {step.currentRockets[rocket]}</div>;
+          return <div key={rocket} className="nice">{this.props.lec.getEngine(rocket).printable} : {step.currentRockets[rocket]}</div>;
         })}
         <div>Total Mass: {step.currentMass}</div>
         {
@@ -146,7 +146,7 @@ class App extends Component {
     var history=[];
     if (localStorage.getItem("history")) {
       const d=JSON.parse(localStorage.getItem("history"));
-      if (d!=undefined) {
+      if (d!=undefined) {  // eslint-disable-line eqeqeq
         history=d;
         // recalculate in case of a bug
         for (var plan of history) {
@@ -179,7 +179,7 @@ class App extends Component {
      };
      console.log(v);
     this.setState(v);
-    if (this.state.plan!=undefined) {
+    if (this.state.plan!=undefined) {  // eslint-disable-line eqeqeq
       localStorage.setItem("history", JSON.stringify(history));
     }
   }
@@ -206,7 +206,7 @@ class App extends Component {
   handleUndo(event) {
     event.preventDefault();
 
-    if (this.state.stepNumber!=0) {
+    if (this.state.stepNumber!==0) {
       const plan = JSON.parse(JSON.stringify(this.state.history[this.state.stepNumber-1]));
       var v={plan: plan, stepNumber:this.state.stepNumber-1}
       console.log(v);
@@ -245,14 +245,14 @@ class App extends Component {
       <table className="App">
       <thead>
       <tr>
-       <th colspan="4" className="history"><button className={(this.state.stepNumber==0)?"inactive":""} onClick={this.handleUndo}>Undo</button>
+       <th colSpan="4" className="history"><button className={(this.state.stepNumber===0)?"inactive":""} onClick={this.handleUndo}>Undo</button>
        {this.state.stepNumber}/{this.state.history.length-1}
        <button onClick={this.handleRedo} className={(this.state.stepNumber<this.state.history.length-1)?"":"inactive"}>Redo</button>
        <button onClick={this.handleClear} >{this.state.clear===true?"Confirm":"Clear"}</button></th>
-       <th colspan="5">Leaving Earth</th>
+       <th colSpan="5">Leaving Earth</th>
       </tr>
       <tr>
-      <th colspan="2">Step</th>
+      <th colSpan="2">Step</th>
       <th>Move</th>
       <th>Diff.</th>
       <th>Time</th>
@@ -265,7 +265,7 @@ class App extends Component {
       </tbody>
       <tfoot>
         <tr>
-          <td><button className="add" onClick={this.handleAddStepEnd}>+</button></td><td colspan="2">Add extra step</td>
+          <td><button className="add" onClick={this.handleAddStepEnd}>+</button></td><td colSpan="2">Add extra step</td>
           {(data.error === undefined
             && <th colSpan="5" className="success">Success</th>)
             || <th colSpan="5" className="error">Error: {data.error}</th>}
