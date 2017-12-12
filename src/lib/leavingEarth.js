@@ -21,47 +21,95 @@ class LeavingEarthCalculator {
     return rockets;
   }
 
+  calculateNeeds(plan) {
+
+  }
+
+  addItems(from, to, mul=1, burnmode=false) {
+    var mass = 0;
+    var error = undefined;
+    for (const originalKey of Object.keys(from)) {
+
+      var key=originalKey;
+      var engine=this.engines.rockets[key];
+/*
+      if (burnmode) {
+        if (!engine.singleUse) {
+
+          if (availableRockets < usedRockets) {
+            x.error = "More "+key+" rockets used than onboard";
+          }
+          // Engines that are single use do not count towards the mass needed
+          excludedMass+=this.engines.rockets[key].weight*x.items[key];
+          if (this.engines.rockets[key].uses!=undefined) {  // eslint-disable-line eqeqeq
+            key = this.engines.rockets[key].uses;
+            // Because the getEngineThrustMass() function doesn't know about the fuel tanks, exclude them here
+            excludedMass+=this.engines.rockets[key].weight*x.items[originalKey];
+          } else {
+            continue;
+          }
+        }
+      }
+*/
+      var number = from[key]*mul;
+      if (key in to) {
+        to[key]+=number;
+      }
+      else {
+        to[key]=number;
+      }
+
+      if (to[key] < 0) {
+        error = "Not enough "+engine.printable+" are onboard";
+      }
+      mass+=engine.weight*number;
+    }
+    return [mass,0, error];
+  }
+
   calculatePlan(plan) {
       var currentMass=0;
-      var currentRockets={}
+      var currentItems={}
       var success = true;
       var index=1;
       plan.error=undefined;
+
+      // Forward propagate
       plan.steps.forEach(x => {
           x.error=undefined;
+          if (x.rockets!==undefined) {
+            x.items=x.rockets;
+            x.rockets=undefined;
+          }
           switch (x.step) {
+          case 'end':
+            break;
           case 'add':
-              if (x.mass !== undefined) {
-                currentMass+=x.mass;
-              }
-              if (x.rockets!==undefined) {
-                for (const key of Object.keys(x.rockets)) {
-                  if (key in currentRockets) {
-                    currentRockets[key]+=x.rockets[key];
-                  }
-                  else {
-                    currentRockets[key]=x.rockets[key];
-                  }
-                  currentMass+=this.engines.rockets[key].weight*x.rockets[key];
-                }
+          case 'start':
+              if (x.items!==undefined) {
+                var [mass, excludedMass, error]=this.addItems(x.items, currentItems);
+                currentMass+=mass;
               }
               break;
           case 'remove':
+            if (x.items!==undefined) {
+              var [mass, excludedMass, error]=this.addItems(x.items, currentItems, -1);
+              x.error=error;
+              currentMass+=mass;
+            }
+            break;
           case 'burn':
-              if (x.mass !== undefined) {
-                currentMass-=x.mass;
-              }
               var originalMass = currentMass;
               var excludedMass = 0;
               var actualBurn = false;
-              if (x.rockets!== undefined) {
-                for (var key of Object.keys(x.rockets)) {
+              if (x.items!== undefined) {
+                for (var key of Object.keys(x.items)) {
                   const originalKey = key;
-                  var availableRockets = currentRockets[key];
+                  var availableRockets = currentItems[key];
                   if (availableRockets == undefined) { // eslint-disable-line eqeqeq
                     availableRockets = 0;
                   }
-                  var usedRockets = x.rockets[key];
+                  var usedRockets = x.items[key];
                   if (usedRockets === 0) {
                     continue;
                   }
@@ -73,26 +121,26 @@ class LeavingEarthCalculator {
                         x.error = "More "+key+" rockets used than onboard";
                       }
                       // Engines that are single use do not count towards the mass needed
-                      excludedMass+=this.engines.rockets[key].weight*x.rockets[key];
+                      excludedMass+=this.engines.rockets[key].weight*x.items[key];
                       if (this.engines.rockets[key].uses!=undefined) {  // eslint-disable-line eqeqeq
                         key = this.engines.rockets[key].uses;
                         // Because the getEngineThrustMass() function doesn't know about the fuel tanks, exclude them here
-                        excludedMass+=this.engines.rockets[key].weight*x.rockets[originalKey];
+                        excludedMass+=this.engines.rockets[key].weight*x.items[originalKey];
                       } else {
                         continue;
                       }
                     }
                   }
-                  if (key in currentRockets) {
-                    currentRockets[key]-=usedRockets;
+                  if (key in currentItems) {
+                    currentItems[key]-=usedRockets;
                   }
                   else {
-                    currentRockets[key]=-usedRockets;
+                    currentItems[key]=-usedRockets;
                   }
-                  if (currentRockets[key] < 0) {
+                  if (currentItems[key] < 0) {
                     x.error = "More "+this.engines.rockets[key].printable+" "+(x.step==="burn"?"burnt":"removed")+" than onboard";
                   }
-                  currentMass-=this.engines.rockets[key].weight*x.rockets[originalKey];
+                  currentMass-=this.engines.rockets[key].weight*x.items[originalKey];
                 }
               }
               if (x.step==='burn') {
@@ -106,7 +154,7 @@ class LeavingEarthCalculator {
                     }
                 }
                 if (actualBurn) {
-                  var [thrust, mass, error] = this.calculateThrustAndMass(x.rockets, x.difficulty, time);
+                  var [thrust, mass, error] = this.calculateThrustAndMass(x.items, x.difficulty, time);
 
                   if (error.length!==0 && x.error === undefined) {
                     x.error=error[0];
@@ -132,7 +180,7 @@ class LeavingEarthCalculator {
               x.error = "Mass is less than 0";
             }
           }
-          x.currentRockets=Object.assign({}, currentRockets);
+          x.currentItems=Object.assign({}, currentItems);
           x.index=index;
           if (x.error !==undefined && plan.error===undefined) {
             success=false;
